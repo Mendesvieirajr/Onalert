@@ -2,6 +2,15 @@
   "expo": {
     "name": "OnAlert",
     "slug": "OnAlert",
+    "platforms": ["ios", "android"],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff",
+        "package": "com.yourcompany.onalert",
+      "googleServicesFile": "./android/app/google-services.json"
+      }
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,16 +21,9 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.onalert",
+      "googleServicesFile": "./ios/GoogleService-Info.plist"
+    }   
   }
 }

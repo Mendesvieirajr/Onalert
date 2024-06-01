@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "903841950483",
+    "project_id": "onalert-53ea9",
+    "storage_bucket": "onalert-53ea9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903841950483:android:a79a91377842c378e1c8e6",
+        "android_client_info": {
+          "package_name": "com.onalert"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUro_X6SMlz5hiVGKl8iusKkOezTgmmOM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
