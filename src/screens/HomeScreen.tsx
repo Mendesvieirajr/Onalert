@@ -65,6 +65,19 @@ const HomeScreen = () => {
           Send Location
         </Text>
       </TouchableOpacity>
+      {!isAuthenticated && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Login')}
+          style={[
+            styles.button,
+            { backgroundColor: isDarkMode ? Colors.dark.buttonBackground : Colors.light.buttonBackground },
+          ]}
+        >
+          <Text style={[styles.buttonText, { color: isDarkMode ? Colors.dark.buttonText : Colors.light.buttonText }]}>
+            Login
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

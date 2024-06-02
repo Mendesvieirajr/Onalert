@@ -36,14 +36,11 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {!isAuthenticated ? (
+        <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
+        {!isAuthenticated && (
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        ) : (
-          <>
-            <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-          </>
         )}
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
