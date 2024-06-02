@@ -2,13 +2,16 @@
   "expo": {
     "name": "OnAlert",
     "slug": "OnAlert",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff",
         "package": "com.yourcompany.onalert",
-      "googleServicesFile": "./android/app/google-services.json"
+        "googleServicesFile": "./android/app/google-services.json"
       }
     },
     "version": "1.0.0",
@@ -24,6 +27,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.onalert",
       "googleServicesFile": "./ios/GoogleService-Info.plist"
-    }   
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }
