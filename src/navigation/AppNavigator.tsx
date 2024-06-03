@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
+import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MedicalRecordsScreen from '../screens/MedicalRecordsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -12,6 +13,7 @@ export type RootStackParamList = {
   Login: undefined;
   HomeTabs: undefined;
   Profile: undefined;
+  Signup: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -37,10 +39,14 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
-        {!isAuthenticated && (
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        {!isAuthenticated ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
+          </>
+        ) : (
+          <Stack.Screen name="Profile" component={ProfileScreen} />
         )}
-        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

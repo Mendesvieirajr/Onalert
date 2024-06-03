@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import { NavigationProp } from '@react-navigation/native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import api from '../services/api';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useAuth } from '../context/AuthContext';
 
 type LoginScreenNavigationProp = NavigationProp<RootStackParamList, 'Login'>;
 
-const LoginScreen = ({ navigation }: { navigation: LoginScreenNavigationProp }) => {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
-  const handleLogin = () => {
-    // Mock login, replace with actual login logic
-    const token = 'fake-jwt-token';
-    login(token);
-    navigation.navigate('HomeTabs');
+  const handleLogin = async () => {
+    try {
+      const response = await api.post('/login', { email, password });
+      login(response.data.token);
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   return (
@@ -25,6 +29,9 @@ const LoginScreen = ({ navigation }: { navigation: LoginScreenNavigationProp }) 
       <Text>Password</Text>
       <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
       <Button title="Login" onPress={handleLogin} />
+      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+        <Text style={styles.signupText}>Já tem conta criada? Criar Conta</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -32,7 +39,7 @@ const LoginScreen = ({ navigation }: { navigation: LoginScreenNavigationProp }) 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 16 },
   input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 12, padding: 8 },
+  signupText: { color: 'blue', marginTop: 16, textAlign: 'center' },
 });
 
 export default LoginScreen;
-
