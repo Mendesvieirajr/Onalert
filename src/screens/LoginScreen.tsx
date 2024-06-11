@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import api from '../services/api';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -17,8 +17,9 @@ const LoginScreen = () => {
     try {
       const response = await api.post('/login', { email, password });
       login(response.data.token);
+      navigation.navigate('HomeTabs');
     } catch (error) {
-      console.error('Login failed:', error);
+      Alert.alert('Login failed', 'An error occurred');
     }
   };
 

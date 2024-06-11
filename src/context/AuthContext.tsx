@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import  * as SecureStore from 'expo-secure-store';
+import * as SecureStore from 'expo-secure-store';
 
 interface AuthContextData {
   isAuthenticated: boolean;
@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync('userToken');
       if (token) {
+        console.log("Token loaded from SecureStore:", token);
         setIsAuthenticated(true);
       }
     };
@@ -25,11 +26,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (token: string) => {
     setIsAuthenticated(true);
     await SecureStore.setItemAsync('userToken', token);
+    console.log("Token saved to SecureStore:", token);
   };
 
   const logout = async () => {
     setIsAuthenticated(false);
     await SecureStore.deleteItemAsync('userToken');
+    console.log("Token removed from SecureStore");
   };
 
   return (

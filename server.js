@@ -1,16 +1,17 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+require('dotenv').config();
+import express, { json } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { verify, sign } from 'jsonwebtoken';
+import { compareSync, hashSync } from 'bcryptjs';
 const prisma = new PrismaClient();
 const app = express();
 
-app.use(express.json());
+app.use(json());
 
-const SECRET_KEY = 'your_secret_key';
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 // Middleware de autenticação
-const authenticateJWT = (req, res, next) => {
+const authenticateJWT = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
@@ -18,10 +19,17 @@ const authenticateJWT = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
-    next();
+    const decoded = verify(token, SECRET_KEY);
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+
+    if (user && user.jwtToken === token) {
+      req.user = decoded;
+      next();
+    } else {
+      res.status(401).json({ error: 'Invalid token.' });
+    }
   } catch (err) {
+    console.error('Token verification error:', err);
     res.status(400).json({ error: 'Invalid token.' });
   }
 };
@@ -31,8 +39,12 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await prisma.user.findUnique({ where: { email } });
 
-  if (user && bcrypt.compareSync(password, user.password)) {
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
+  if (user && compareSync(password, user.password)) {
+    const token = sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { jwtToken: token },
+    });
     res.json({ token });
   } else {
     res.status(401).json({ error: 'Invalid email or password.' });
@@ -42,7 +54,7 @@ app.post('/login', async (req, res) => {
 // Rota de registro
 app.post('/register', async (req, res) => {
   const { email, password, name } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 8);
+  const hashedPassword = hashSync(password, 8);
   try {
     const user = await prisma.user.create({ data: { email, password: hashedPassword, name } });
     res.json(user);
@@ -51,10 +63,40 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Rota protegida
-app.get('/medical-records', authenticateJWT, async (req, res) => {
-  const records = await prisma.medicalRecord.findMany({ where: { userId: req.user.id } });
-  res.json(records);
+// Rota protegida para obter detalhes do perfil
+app.get('/profile', authenticateJWT, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ error: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// Rota protegida para atualizar o perfil
+app.put('/profile', authenticateJWT, async (req, res) => {
+  const { name, email, password, profilePicture } = req.body;
+  const updateData = { name, email, profilePicture };
+
+  if (password) {
+    updateData.password = hashSync(password, 8);
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+    });
+    res.json(user);
+  } catch (error) {  
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
 });
 
 app.listen(3000, () => {
