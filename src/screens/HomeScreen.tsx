@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import Colors from '../constants/Colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../context/AuthContext';
+import EmergencyButton from '../components/EmergencyButton';
 
 type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'HomeTabs'>;
 
@@ -12,7 +13,7 @@ const HomeScreen = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const sendLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -54,17 +55,14 @@ const HomeScreen = () => {
           Call Emergency 112
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={sendLocation}
-        style={[
-          styles.button,
-          { backgroundColor: isDarkMode ? Colors.dark.buttonBackground : Colors.light.buttonBackground },
-        ]}
-      >
-        <Text style={[styles.buttonText, { color: isDarkMode ? Colors.dark.buttonText : Colors.light.buttonText }]}>
-          Send Location
-        </Text>
-      </TouchableOpacity>
+      <EmergencyButton />
+      {isAuthenticated && (
+        <TouchableOpacity onPress={logout} style={[styles.button, { backgroundColor: isDarkMode ? Colors.dark.buttonBackground : Colors.light.buttonBackground }]}>
+          <Text style={[styles.buttonText, { color: isDarkMode ? Colors.dark.buttonText : Colors.light.buttonText }]}>
+            Sign Out
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

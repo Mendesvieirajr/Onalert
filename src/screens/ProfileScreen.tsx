@@ -84,7 +84,7 @@ const ProfileScreen = () => {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         const { profilePicture: uploadedProfilePicture } = uploadResponse.data;
-        setProfilePicture(uploadedProfilePicture);
+        setProfilePicture(`http://localhost:3000/${uploadedProfilePicture}`);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error('Failed to upload image:', error.message);
@@ -139,4 +139,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
-
