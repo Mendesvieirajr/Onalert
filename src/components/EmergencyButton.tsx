@@ -67,6 +67,6 @@ const EmergencyButton = () => {
   return (
     <Button title="Send Location" onPress={sendLocationSMS} />
   );
-};
+};  
 
 export default EmergencyButton;
