@@ -59,8 +59,10 @@ const ProfileScreen = () => {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Failed to update profile:', error.message);
+        Alert.alert('Error', `Failed to update profile: ${error.response?.data?.error || error.message}`);
       } else {
         console.error('Failed to update profile:', error);
+        Alert.alert('Error', 'Failed to update profile.');
       }
     }
   };

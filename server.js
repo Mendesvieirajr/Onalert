@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your_default_secret_key';
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -99,6 +99,56 @@ app.get('/profile', authenticateJWT, async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+app.put('/profile', authenticateJWT, async (req, res) => {
+  const { name, email, password, profilePicture } = req.body;
+  const updateData = { name, email, profilePicture };
+
+  if (password) {
+    updateData.password = bcrypt.hashSync(password, 8);
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+    });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/emergency-contacts', authenticateJWT, async (req, res) => {
+  try {
+    const contacts = await prisma.emergencyContact.findMany({ where: { userId: req.user.id } });
+    res.json(contacts);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/emergency-contacts', authenticateJWT, async (req, res) => {
+  const { name, phone } = req.body;
+  try {
+    const contact = await prisma.emergencyContact.create({
+      data: { name, phone, userId: req.user.id },
+    });
+    res.json(contact);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/emergency-contacts/:id', authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.emergencyContact.delete({ where: { id: parseInt(id, 10) } });
+    res.json({ message: 'Contact deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

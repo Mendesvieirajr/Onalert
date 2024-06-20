@@ -17,6 +17,7 @@ model User {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   medicalRecords MedicalRecord[]
+  emergencyContacts EmergencyContact[]
 }
 
 model MedicalRecord {
@@ -25,5 +26,13 @@ model MedicalRecord {
   record    String
   createdAt DateTime @default(now())
 
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model EmergencyContact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  userId    Int
   user      User     @relation(fields: [userId], references: [id])
 }

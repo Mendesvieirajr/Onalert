@@ -8,12 +8,14 @@ import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MedicalRecordsScreen from '../screens/MedicalRecordsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import EmergencyContactsScreen from '../screens/EmergencyContactsScreen';
 
 export type RootStackParamList = {
   Login: undefined;
   HomeTabs: undefined;
   Profile: undefined;
   Signup: undefined;
+  EmergencyContacts: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -26,7 +28,10 @@ const HomeTabs = () => {
     <Tab.Navigator>
       <Tab.Screen name="Home" component={HomeScreen} />
       {isAuthenticated && (
-        <Tab.Screen name="MedicalRecords" component={MedicalRecordsScreen} />
+        <>
+          <Tab.Screen name="MedicalRecords" component={MedicalRecordsScreen} />
+          <Tab.Screen name="EmergencyContacts" component={EmergencyContactsScreen} />
+        </>
       )}
     </Tab.Navigator>
   );
@@ -39,14 +44,13 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
-        {!isAuthenticated ? (
+        {!isAuthenticated && (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
           </>
-        ) : (
-          <Stack.Screen name="Profile" component={ProfileScreen} />
         )}
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
