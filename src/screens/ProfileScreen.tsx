@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import { FontAwesome } from '@expo/vector-icons';
+import Modal from 'react-native-modal';
 
 type UserProfile = {
   id: number;
@@ -21,6 +23,7 @@ const ProfileScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -30,7 +33,7 @@ const ProfileScreen = () => {
         setProfile(userProfile);
         setName(userProfile.name);
         setEmail(userProfile.email);
-        setProfilePicture(userProfile.profilePicture);
+        setProfilePicture(userProfile.profilePicture ? `http://192.168.1.72:3000/uploads/${userProfile.profilePicture}` : null);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error('Failed to fetch profile:', error.message);
@@ -84,12 +87,15 @@ const ProfileScreen = () => {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         const { profilePicture: uploadedProfilePicture } = uploadResponse.data;
-        setProfilePicture(`http://localhost:3000/${uploadedProfilePicture}`);
+        setProfilePicture(`http://192.168.1.72:3000/uploads/${uploadedProfilePicture}`);
+        setIsModalVisible(false);
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error('Failed to upload image:', error.message);
+          Alert.alert('Error', `Failed to upload image: ${error.response?.data?.error || error.message}`);
         } else {
           console.error('Failed to upload image:', error);
+          Alert.alert('Error', 'Failed to upload image.');
         }
       }
     }
@@ -99,7 +105,19 @@ const ProfileScreen = () => {
     <View style={styles.container}>
       {profile && (
         <>
-          {profilePicture && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
+          <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+            <View style={styles.profileImageContainer}>
+              {profilePicture ? (
+                <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+              ) : (
+                <FontAwesome name="user-circle" size={100} color="gray" />
+              )}
+              <View style={styles.editIcon}>
+                <FontAwesome name="pencil" size={20} color="white" />
+              </View>
+            </View>
+          </TouchableOpacity>
+
           <Text>Nome: {profile.name}</Text>
           <Text>Email: {profile.email}</Text>
           <Text>Data de Entrada: {new Date(profile.createdAt).toLocaleDateString()}</Text>
@@ -123,9 +141,15 @@ const ProfileScreen = () => {
             onChangeText={setPassword}
             secureTextEntry
           />
-          <Button title="Escolher Imagem" onPress={handleChooseImage} />
           <Button title="Atualizar Perfil" onPress={handleUpdateProfile} />
           <Button title="Logout" onPress={logout} />
+
+          <Modal isVisible={isModalVisible}>
+            <View style={styles.modalContent}>
+              <Button title="Atualizar Foto de Perfil" onPress={handleChooseImage} />
+              <Button title="Cancelar" onPress={() => setIsModalVisible(false)} />
+            </View>
+          </Modal>
         </>
       )}
     </View>
@@ -135,7 +159,17 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 16 },
   input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 12, padding: 8 },
-  profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 20 },
+  profileImageContainer: { position: 'relative', alignItems: 'center', marginBottom: 20 },
+  profileImage: { width: 100, height: 100, borderRadius: 50, borderWidth: 3, borderColor: 'gray' },
+  editIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: 'black',
+    borderRadius: 50,
+    padding: 5,
+  },
+  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
 });
 
 export default ProfileScreen;
