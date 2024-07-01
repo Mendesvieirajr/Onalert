@@ -8,25 +8,34 @@ generator client {
 }
 
 model User {
-  id            Int              @id @default(autoincrement())
-  email         String           @unique
-  password      String
-  name          String?
-  profilePicture String?
-  jwtToken      String?          
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  medicalRecords MedicalRecord[]
-  emergencyContacts EmergencyContact[]
+  id                   Int                  @id @default(autoincrement())
+  email                String               @unique
+  password             String
+  name                 String?
+  profilePicture       String?
+  jwtToken             String?          
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  medicalRecords       MedicalRecord[]
+  emergencyContacts    EmergencyContact[]
 }
 
 model MedicalRecord {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  record    String
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
+  id                    Int      @id @default(autoincrement())
+  patientNumber         String
+  familyDoctor          String?
+  familyDoctorPhone     String?
+  healthCenter          String?
+  healthCenterLocation  String?
+  healthInsuranceNumber String?
+  allergies             Json?
+  medication            Json?
+  vaccinesUpToDate      Boolean
+  vitalWill             Boolean
+  vitalWillExpiryDate   DateTime?
+  userId                Int
+  user                  User     @relation(fields: [userId], references: [id])
+  createdAt             DateTime @default(now())
 }
 
 model EmergencyContact {

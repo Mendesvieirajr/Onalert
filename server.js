@@ -152,6 +152,35 @@ app.delete('/emergency-contacts/:id', authenticateJWT, async (req, res) => {
   }
 });
 
+app.get('/medical-records', authenticateJWT, async (req, res) => {
+  try {
+    const records = await prisma.medicalRecord.findMany({ where: { userId: req.user.id } });
+    res.json(records);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/medical-records', authenticateJWT, async (req, res) => {
+  const { 
+    patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
+    healthCenterLocation, healthInsuranceNumber, allergies, medication, 
+    vaccinesUpToDate, vitalWill, vitalWillExpiryDate 
+  } = req.body;
+  try {
+    const record = await prisma.medicalRecord.create({
+      data: {
+        patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
+        healthCenterLocation, healthInsuranceNumber, allergies, medication, 
+        vaccinesUpToDate, vitalWill, vitalWillExpiryDate, userId: req.user.id,
+      },
+    });
+    res.json(record);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
