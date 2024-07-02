@@ -143,7 +143,7 @@ const MedicalRecordsScreen = () => {
             style={styles.input}
             value={newRecord.patientNumber}
             onChangeText={text => setNewRecord(prevState => ({ ...prevState, patientNumber: text }))}
-          />
+            />
           <Text style={styles.label}>Tem médico de família?</Text>
           <Switch
             value={showFamilyDoctorFields}
@@ -264,12 +264,16 @@ const MedicalRecordsScreen = () => {
         </ScrollView>
       ) : (
         <>
-          <Button title="Editar Informações" onPress={() => setShowForm(true)} />
-          <FlatList
-            data={medicalRecords}
-            renderItem={renderItem}
-            keyExtractor={item => item.id!.toString()}
-          />
+          <Button title="Adicionar Informações" onPress={() => setShowForm(true)} />
+          {medicalRecords.length > 0 ? (
+            <FlatList
+              data={medicalRecords}
+              renderItem={renderItem}
+              keyExtractor={item => item.id!.toString()}
+            />
+          ) : (
+            <Text>Nenhum registro disponível</Text>
+          )}
         </>
       )}
     </View>

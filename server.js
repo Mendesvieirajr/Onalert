@@ -157,40 +157,63 @@ app.get('/medical-records', authenticateJWT, async (req, res) => {
     const records = await prisma.medicalRecord.findMany({ where: { userId: req.user.id } });
     res.json(records);
   } catch (error) {
+    console.error('Error fetching records:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.post('/medical-records', authenticateJWT, async (req, res) => {
-  const {
-    patientNumber, familyDoctor, familyDoctorPhone, healthCenter,
-    healthCenterLocation, healthInsuranceNumber, allergies, medication,
-    vaccinesUpToDate, vitalWill, vitalWillExpiryDate
+  const { 
+    patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
+    healthCenterLocation, healthInsuranceNumber, allergies, medication, 
+    vaccinesUpToDate, vitalWill, vitalWillExpiryDate 
   } = req.body;
   try {
     const record = await prisma.medicalRecord.create({
       data: {
-        patientNumber, familyDoctor, familyDoctorPhone, healthCenter,
-        healthCenterLocation, healthInsuranceNumber, allergies, medication,
+        patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
+        healthCenterLocation, healthInsuranceNumber, allergies, medication, 
         vaccinesUpToDate, vitalWill, vitalWillExpiryDate, userId: req.user.id,
       },
     });
     res.json(record);
   } catch (error) {
+    console.error('Error creating record:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-app.delete('/medical-records/:id', authenticateJWT, async (req, res) => {
+
+app.put('/medical-records/:id', authenticateJWT, async (req, res) => {
   const { id } = req.params;
+  const { 
+    patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
+    healthCenterLocation, healthInsuranceNumber, allergies, medication, 
+    vaccinesUpToDate, vitalWill, vitalWillExpiryDate 
+  } = req.body;
   try {
-    const record = await prisma.medicalRecord.delete({
-      where: {
-        id: parseInt(id),
+    const record = await prisma.medicalRecord.update({
+      where: { id: Number(id) },
+      data: {
+        patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
+        healthCenterLocation, healthInsuranceNumber, allergies, medication, 
+        vaccinesUpToDate, vitalWill, vitalWillExpiryDate,
       },
     });
     res.json(record);
   } catch (error) {
-    res.status(404).json({ error: 'Record not found' });
+    console.error('Error updating record:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/medical-records/:id', authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.medicalRecord.delete({ where: { id: Number(id) } });
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting record:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
