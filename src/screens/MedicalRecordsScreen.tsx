@@ -26,8 +26,8 @@ const MedicalRecordsScreen = () => {
     vaccinesUpToDate: false,
     vitalWill: false,
   });
-
   const [showForm, setShowForm] = useState(false);
+
   const [showFamilyDoctorFields, setShowFamilyDoctorFields] = useState(false);
   const [showHealthCenterFields, setShowHealthCenterFields] = useState(false);
   const [showHealthInsuranceFields, setShowHealthInsuranceFields] = useState(false);
@@ -60,12 +60,8 @@ const MedicalRecordsScreen = () => {
         await api.post('/medical-records', newRecord);
       }
       Alert.alert('Success', 'Record saved successfully');
-      setNewRecord({
-        patientNumber: '',
-        vaccinesUpToDate: false,
-        vitalWill: false,
-      });
       setShowForm(false);
+      setNewRecord({ patientNumber: '', vaccinesUpToDate: false, vitalWill: false });
       fetchRecords();
     } catch (error: any) {
       console.error('Failed to save record:', error);
@@ -90,6 +86,17 @@ const MedicalRecordsScreen = () => {
         medication: [...(prevState.medication || []), medication],
       }));
       setMedication({ name: '', startDate: '' });
+    }
+  };
+
+  const handleDeleteRecord = async (id: number) => {
+    try {
+      await api.delete(`/medical-records/${id}`);
+      Alert.alert('Success', 'Record deleted successfully');
+      fetchRecords();
+    } catch (error: any) {
+      console.error('Failed to delete record:', error);
+      Alert.alert('Error', `Failed to delete record: ${error.response?.data?.error || error.message}`);
     }
   };
 
@@ -122,19 +129,14 @@ const MedicalRecordsScreen = () => {
       {item.vitalWill && item.vitalWillExpiryDate && (
         <Text style={styles.label}>Data de Expiração: {new Date(item.vitalWillExpiryDate).toLocaleDateString()}</Text>
       )}
-      <Button title="Editar" onPress={() => handleEditRecord(item)} />
+      <Button title="Editar" onPress={() => { setNewRecord(item); setShowForm(true); }} />
+      <Button title="Deletar" onPress={() => handleDeleteRecord(item.id!)} />
     </View>
   );
 
-  const handleEditRecord = (record: MedicalRecord) => {
-    setNewRecord(record);
-    setShowForm(true);
-  };
-
   return (
     <View style={styles.container}>
-      <Button title="Adicionar Novo Registro" onPress={() => setShowForm(true)} />
-      {showForm && (
+      {showForm ? (
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.label}>Número de Utente</Text>
           <TextInput
@@ -228,43 +230,48 @@ const MedicalRecordsScreen = () => {
                 value={medication.name}
                 onChangeText={text => setMedication(prevState => ({ ...prevState, name: text }))}
               />
-               <Text style={styles.label}>Data de Início</Text>
-            <TextInput
-              style={styles.input}
-              value={medication.startDate}
-              onChangeText={text => setMedication(prevState => ({ ...prevState, startDate: text }))}
-            />
-            <Button title="Adicionar Medicamento" onPress={handleAddMedication} />
-          </>
-        )}
-        <Text style={styles.label}>Vacinas em dia?</Text>
-        <Switch
-          value={newRecord.vaccinesUpToDate}
-          onValueChange={value => setNewRecord(prevState => ({ ...prevState, vaccinesUpToDate: value }))}
-        />
-        <Text style={styles.label}>Tem testamento vital?</Text>
-        <Switch
-          value={newRecord.vitalWill}
-          onValueChange={value => setNewRecord(prevState => ({ ...prevState, vitalWill: value }))}
-        />
-        {newRecord.vitalWill && (
-          <>
-            <Text style={styles.label}>Data de Expiração do Testamento Vital</Text>
-            <TextInput
-              style={styles.input}
-              value={newRecord.vitalWillExpiryDate}
-              onChangeText={text => setNewRecord(prevState => ({ ...prevState, vitalWillExpiryDate: text }))}
-            />
-          </>
-        )}
-        <Button title="Salvar Registro" onPress={handleSaveRecord} />
-      </ScrollView>
+              <Text style={styles.label}>Data de Início</Text>
+              <TextInput
+                style={styles.input}
+                value={medication.startDate}
+                onChangeText={text => setMedication(prevState => ({ ...prevState, startDate: text }))}
+              />
+              <Button title="Adicionar Medicamento" onPress={handleAddMedication} />
+            </>
+          )}
+          <Text style={styles.label}>Vacinas em dia?</Text>
+          <Switch
+            value={newRecord.vaccinesUpToDate}
+            onValueChange={value => setNewRecord(prevState => ({ ...prevState, vaccinesUpToDate: value }))}
+          />
+          <Text style={styles.label}>Tem testamento vital?</Text>
+          <Switch
+            value={newRecord.vitalWill}
+            onValueChange={value => setNewRecord(prevState => ({ ...prevState, vitalWill: value }))}
+          />
+          {newRecord.vitalWill && (
+            <>
+              <Text style={styles.label}>Data de Expiração do Testamento Vital</Text>
+              <TextInput
+                style={styles.input}
+                value={newRecord.vitalWillExpiryDate}
+                onChangeText={text => setNewRecord(prevState => ({ ...prevState, vitalWillExpiryDate: text }))}
+              />
+            </>
+          )}
+          <Button title="Salvar Registro" onPress={handleSaveRecord} />
+          <Button title="Cancelar" onPress={() => setShowForm(false)} />
+        </ScrollView>
+      ) : (
+        <>
+          <Button title="Editar Informações" onPress={() => setShowForm(true)} />
+          <FlatList
+            data={medicalRecords}
+            renderItem={renderItem}
+            keyExtractor={item => item.id!.toString()}
+          />
+        </>
       )}
-      <FlatList
-        data={medicalRecords}
-        renderItem={renderItem}
-        keyExtractor={item => item.id?.toString() || item.patientNumber}
-      />
     </View>
   );
 };
@@ -285,15 +292,18 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   recordContainer: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'gray',
     marginBottom: 16,
+    padding: 16,
+    backgroundColor: '#fff',
     borderRadius: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   subLabel: {
     fontSize: 14,
-    marginLeft: 8,
+    marginBottom: 4,
   },
 });
 

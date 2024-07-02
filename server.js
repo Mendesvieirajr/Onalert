@@ -162,22 +162,35 @@ app.get('/medical-records', authenticateJWT, async (req, res) => {
 });
 
 app.post('/medical-records', authenticateJWT, async (req, res) => {
-  const { 
-    patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
-    healthCenterLocation, healthInsuranceNumber, allergies, medication, 
-    vaccinesUpToDate, vitalWill, vitalWillExpiryDate 
+  const {
+    patientNumber, familyDoctor, familyDoctorPhone, healthCenter,
+    healthCenterLocation, healthInsuranceNumber, allergies, medication,
+    vaccinesUpToDate, vitalWill, vitalWillExpiryDate
   } = req.body;
   try {
     const record = await prisma.medicalRecord.create({
       data: {
-        patientNumber, familyDoctor, familyDoctorPhone, healthCenter, 
-        healthCenterLocation, healthInsuranceNumber, allergies, medication, 
+        patientNumber, familyDoctor, familyDoctorPhone, healthCenter,
+        healthCenterLocation, healthInsuranceNumber, allergies, medication,
         vaccinesUpToDate, vitalWill, vitalWillExpiryDate, userId: req.user.id,
       },
     });
     res.json(record);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+app.delete('/medical-records/:id', authenticateJWT, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const record = await prisma.medicalRecord.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+    res.json(record);
+  } catch (error) {
+    res.status(404).json({ error: 'Record not found' });
   }
 });
 
