@@ -1,104 +1,67 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useColorScheme, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, useColorScheme } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import * as Location from 'expo-location';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import styles, { commonStyles } from '../constants/styles';
 import Colors from '../constants/Colors';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../context/AuthContext';
 import EmergencyButton from '../components/EmergencyButton';
 
-type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'HomeTabs'>;
+type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { isAuthenticated, logout } = useAuth();
-
-  const sendLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Permission to access location was denied');
-      return;
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-    alert(`Location: ${location.coords.latitude}, ${location.coords.longitude}`);
-  };
+  const { isAuthenticated } = useAuth();
+  const iconSize = styles.iconSize.fontSize;
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
-      <View style={styles.header}>
+    <View style={commonStyles.container}>
+      <View style={commonStyles.header}>
+        <Text style={commonStyles.headerText}>OnAlert</Text>
         {isAuthenticated ? (
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <Text style={[styles.profileButton, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-              Profile
-            </Text>
+          <TouchableOpacity style={commonStyles.iconButton} onPress={() => navigation.navigate('Profile')}>
+            <Ionicons name="person-circle-outline" size={iconSize} color={Colors.light.background} />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={[styles.profileButton, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>
-              Login
-            </Text>
+          <TouchableOpacity style={commonStyles.iconButton} onPress={() => navigation.navigate('Login')}>
+            <Ionicons name="log-in-outline" size={iconSize} color={Colors.light.background} />
           </TouchableOpacity>
         )}
       </View>
-      <Text style={[styles.text, { color: isDarkMode ? Colors.dark.text : Colors.light.text }]}>Home Screen</Text>
-      <TouchableOpacity
-        onPress={() => Linking.openURL('tel:112')}
-        style={[
-          styles.button,
-          { backgroundColor: isDarkMode ? Colors.dark.buttonBackground : Colors.light.buttonBackground },
-        ]}
-      >
-        <Text style={[styles.buttonText, { color: isDarkMode ? Colors.dark.buttonText : Colors.light.buttonText }]}>
-          Call Emergency 112
-        </Text>
-      </TouchableOpacity>
-      <EmergencyButton />
-      {isAuthenticated && (
-        <TouchableOpacity onPress={logout} style={[styles.button, { backgroundColor: isDarkMode ? Colors.dark.buttonBackground : Colors.light.buttonBackground }]}>
-          <Text style={[styles.buttonText, { color: isDarkMode ? Colors.dark.buttonText : Colors.light.buttonText }]}>
-            Sign Out
-          </Text>
+      <View style={[commonStyles.contentContainer, { backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }]}>
+        {isAuthenticated && (
+          <View style={commonStyles.grid}>
+            <TouchableOpacity style={[commonStyles.gridItem, commonStyles.medicalButton]} onPress={() => navigation.navigate('MedicalRecords')}>
+              <Ionicons name="document-text-outline" size={iconSize} color="#fff" />
+              <Text style={commonStyles.gridItemText}>Registos Médicos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[commonStyles.gridItem, commonStyles.contactsButton]} onPress={() => navigation.navigate('EmergencyContacts')}>
+              <MaterialIcons name="contacts" size={iconSize} color="#fff" />
+              <Text style={commonStyles.gridItemText}>Contactos de Emergência</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <TouchableOpacity
+          style={[commonStyles.gridItem, commonStyles.emergencyButton]}
+          onPress={() => Linking.openURL('tel:112')}
+        >
+          <Ionicons name="call-outline" size={iconSize} color="#fff" />
+          <Text style={commonStyles.gridItemText}>EMERGÊNCIA 112</Text>
         </TouchableOpacity>
-      )}
+        <EmergencyButton />
+        <TouchableOpacity
+          style={[commonStyles.gridItem, commonStyles.infoButton]}
+          onPress={() => navigation.navigate('TOS')}
+        >
+          <Ionicons name="information-circle-outline" size={iconSize} color="#fff" />
+          <Text style={commonStyles.gridItemText}>Informações</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  header: {
-    width: '100%',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  profileButton: {
-    fontSize: 16,
-  },
-  text: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  button: {
-    padding: 20,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    fontWeight: 'bold',
-  },
-});
 
 export default HomeScreen;

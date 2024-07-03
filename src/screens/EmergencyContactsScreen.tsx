@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -78,15 +79,20 @@ const EmergencyContactsScreen = () => {
         onChangeText={setPhone}
         keyboardType="phone-pad"
       />
-      <Button title="Adicionar Contato" onPress={handleAddContact} />
+      <TouchableOpacity style={styles.addButton} onPress={handleAddContact}>
+        <Text style={styles.buttonText}>Adicionar Contato</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={contacts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.contactContainer}>
-            <Text>{item.name}: {item.phone}</Text>
-            <Button title="Delete" onPress={() => handleDeleteContact(item.id)} />
+            <FontAwesome name="user" size={24} color="black" style={styles.contactIcon} />
+            <Text style={styles.contactText}>{item.name}: {item.phone}</Text>
+            <TouchableOpacity onPress={() => handleDeleteContact(item.id)}>
+              <FontAwesome name="trash" size={24} color="red" />
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -96,8 +102,34 @@ const EmergencyContactsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 12, padding: 8 },
-  contactContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 8 },
+  input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 12, padding: 8, borderRadius: 4 },
+  addButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  buttonText: { color: 'white', fontWeight: 'bold' },
+  contactContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 8,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  contactIcon: {
+    marginRight: 10,
+  },
+  contactText: {
+    flex: 1,
+  },
 });
 
 export default EmergencyContactsScreen;

@@ -1,65 +1,56 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MedicalRecordsScreen from '../screens/MedicalRecordsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EmergencyContactsScreen from '../screens/EmergencyContactsScreen';
+import TOSScreen from '../screens/TOSScreen'; // Import TOSScreen
 
 export type RootStackParamList = {
   Login: undefined;
-  HomeTabs: undefined;
+  Home: undefined;
   Profile: undefined;
   Signup: undefined;
   EmergencyContacts: undefined;
+  MedicalRecords: undefined;
+  TOS: undefined; // Add TOS to the stack
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const Tab = createBottomTabNavigator();
-
-const HomeTabs = () => {
-  const { isAuthenticated } = useAuth();
-
-  return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      {isAuthenticated && (
-        <>
-          <Tab.Screen name="MedicalRecords" component={MedicalRecordsScreen} />
-          <Tab.Screen name="EmergencyContacts" component={EmergencyContactsScreen} />
-        </>
-      )}
-    </Tab.Navigator>
-  );
-};
 
 const AppNavigator = () => {
   const { isAuthenticated } = useAuth();
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="HomeTabs" component={HomeTabs} options={{ headerShown: false }} />
-        {!isAuthenticated && (
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: 'red' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      >
+        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+        {!isAuthenticated ? (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
           </>
+        ) : (
+          <>
+            <Stack.Screen name="MedicalRecords" component={MedicalRecordsScreen} options={{ title: 'Registos Médicos' }} />
+            <Stack.Screen name="EmergencyContacts" component={EmergencyContactsScreen} options={{ title: 'Contactos de Emergência' }} />
+            <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
+          </>
         )}
-        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="TOS" component={TOSScreen} options={{ title: 'Terms of Service' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
-const App = () => (
-  <AuthProvider>
-    <AppNavigator />
-  </AuthProvider>
-);
-
-export default App;
+export default AppNavigator;

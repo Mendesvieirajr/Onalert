@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, Image, Alert, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { FontAwesome } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
+import { commonStyles } from '../constants/styles';
 
 type UserProfile = {
   id: number;
@@ -24,6 +25,7 @@ const ProfileScreen = () => {
   const [password, setPassword] = useState('');
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -55,6 +57,7 @@ const ProfileScreen = () => {
       const response = await api.put('/profile', { name, email, password, profilePicture });
       const updatedProfile: UserProfile = response.data;
       setProfile(updatedProfile);
+      setIsEditMode(false);
       alert('Profile updated successfully');
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -104,50 +107,81 @@ const ProfileScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       {profile && (
         <>
           <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-            <View style={styles.profileImageContainer}>
+            <View style={commonStyles.profileImageContainer}>
               {profilePicture ? (
-                <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+                <Image source={{ uri: profilePicture }} style={commonStyles.profileImage} />
               ) : (
                 <FontAwesome name="user-circle" size={100} color="gray" />
               )}
-              <View style={styles.editIcon}>
+              <View style={commonStyles.editIcon}>
                 <FontAwesome name="pencil" size={20} color="white" />
               </View>
             </View>
           </TouchableOpacity>
 
-          <Text>Nome: {profile.name}</Text>
-          <Text>Email: {profile.email}</Text>
-          <Text>Data de Entrada: {new Date(profile.createdAt).toLocaleDateString()}</Text>
+          {!isEditMode && (
+            <View style={commonStyles.infoContainer}>
+              <View style={commonStyles.infoRow}>
+                <FontAwesome name="user" size={24} color="gray" />
+                <Text style={commonStyles.infoText}>Nome: {profile.name}</Text>
+              </View>
+              <View style={commonStyles.infoRow}>
+                <FontAwesome name="envelope" size={24} color="gray" />
+                <Text style={commonStyles.infoText}>Email: {profile.email}</Text>
+              </View>
+              <View style={commonStyles.infoRow}>
+                <FontAwesome name="calendar" size={24} color="gray" />
+                <Text style={commonStyles.infoText}>Data de Entrada: {new Date(profile.createdAt).toLocaleDateString()}</Text>
+              </View>
+            </View>
+          )}
 
-          <TextInput
-            style={styles.input}
-            placeholder="Nome"
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Senha"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          <Button title="Atualizar Perfil" onPress={handleUpdateProfile} />
-          <Button title="Logout" onPress={logout} />
+          {isEditMode && (
+            <>
+              <TextInput
+                style={commonStyles.input}
+                placeholder="Nome"
+                value={name}
+                onChangeText={setName}
+              />
+              <TextInput
+                style={commonStyles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <TextInput
+                style={commonStyles.input}
+                placeholder="Senha"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+              <TouchableOpacity style={commonStyles.button} onPress={handleUpdateProfile}>
+                <Text style={commonStyles.buttonText}>Salvar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={commonStyles.button} onPress={() => setIsEditMode(false)}>
+                <Text style={commonStyles.buttonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {!isEditMode && (
+            <TouchableOpacity style={commonStyles.button} onPress={() => setIsEditMode(true)}>
+              <Text style={commonStyles.buttonText}>Editar Perfil</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity style={commonStyles.logoutButton} onPress={logout}>
+            <Text style={commonStyles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
 
           <Modal isVisible={isModalVisible}>
-            <View style={styles.modalContent}>
+            <View style={commonStyles.modalContent}>
               <Button title="Atualizar Foto de Perfil" onPress={handleChooseImage} />
               <Button title="Cancelar" onPress={() => setIsModalVisible(false)} />
             </View>
@@ -157,21 +191,5 @@ const ProfileScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 16 },
-  input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 12, padding: 8 },
-  profileImageContainer: { position: 'relative', alignItems: 'center', marginBottom: 20 },
-  profileImage: { width: 100, height: 100, borderRadius: 50, borderWidth: 3, borderColor: 'gray' },
-  editIcon: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: 'black',
-    borderRadius: 50,
-    padding: 5,
-  },
-  modalContent: { backgroundColor: 'white', padding: 20, borderRadius: 10 },
-});
 
 export default ProfileScreen;

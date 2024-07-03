@@ -1,13 +1,16 @@
 import React from 'react';
-import { Button, Alert } from 'react-native';
+import { TouchableOpacity, Text, Alert, View } from 'react-native';
 import * as Location from 'expo-location';
 import * as SMS from 'expo-sms';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
+import styles from '../constants/styles'; // Import styles
 
 const EmergencyButton = () => {
   const { isAuthenticated } = useAuth();
+  const iconSize = styles.iconSize.fontSize;
 
   const sendLocationSMS = async () => {
     // Solicitar permissão para acessar a localização
@@ -65,8 +68,13 @@ const EmergencyButton = () => {
   };
 
   return (
-    <Button title="Send Location" onPress={sendLocationSMS} />
+    <TouchableOpacity style={[styles.gridItem, styles.fullWidth, styles.locationButton]} onPress={sendLocationSMS}>
+      <View style={{ alignItems: 'center' }}>
+        <Ionicons name="location-outline" size={iconSize} color="#fff" />
+        <Text style={styles.gridItemText}>Enviar Localização</Text>
+      </View>
+    </TouchableOpacity>
   );
-};  
+};
 
 export default EmergencyButton;

@@ -1,7 +1,11 @@
+// MedicalRecordsScreen.tsx
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert, Switch, FlatList } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert, Switch, FlatList, TouchableOpacity } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import commonStyles from '../constants/styles';
 
 type MedicalRecord = {
   id?: number;
@@ -12,7 +16,7 @@ type MedicalRecord = {
   healthCenterLocation?: string;
   healthInsuranceNumber?: string;
   allergies?: string[];
-  medication?: { name: string, startDate: string }[];
+  medication?: { name: string; startDate: string }[];
   vaccinesUpToDate: boolean;
   vitalWill: boolean;
   vitalWillExpiryDate?: string;
@@ -27,7 +31,6 @@ const MedicalRecordsScreen = () => {
     vitalWill: false,
   });
   const [showForm, setShowForm] = useState(false);
-
   const [showFamilyDoctorFields, setShowFamilyDoctorFields] = useState(false);
   const [showHealthCenterFields, setShowHealthCenterFields] = useState(false);
   const [showHealthInsuranceFields, setShowHealthInsuranceFields] = useState(false);
@@ -35,6 +38,7 @@ const MedicalRecordsScreen = () => {
   const [showMedicationFields, setShowMedicationFields] = useState(false);
   const [allergy, setAllergy] = useState('');
   const [medication, setMedication] = useState({ name: '', startDate: '' });
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -129,25 +133,37 @@ const MedicalRecordsScreen = () => {
       {item.vitalWill && item.vitalWillExpiryDate && (
         <Text style={styles.label}>Data de Expiração: {new Date(item.vitalWillExpiryDate).toLocaleDateString()}</Text>
       )}
-      <Button title="Editar" onPress={() => { setNewRecord(item); setShowForm(true); }} />
-      <Button title="Deletar" onPress={() => handleDeleteRecord(item.id!)} />
+      <TouchableOpacity style={styles.editButton} onPress={() => { setNewRecord(item); setShowForm(true); }}>
+        <Text style={styles.buttonText}>Editar</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteRecord(item.id!)}>
+        <Text style={styles.buttonText}>Eliminar</Text>
+      </TouchableOpacity>
     </View>
   );
+
+  const handleDateChange = (event: any, date: any) => {
+    setShowDatePicker(false);
+    if (date) {
+      setNewRecord(prevState => ({ ...prevState, vitalWillExpiryDate: date.toISOString() }));
+    }
+  };
 
   return (
     <View style={styles.container}>
       {showForm ? (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={styles.formContainer}>
           <Text style={styles.label}>Número de Utente</Text>
           <TextInput
             style={styles.input}
             value={newRecord.patientNumber}
             onChangeText={text => setNewRecord(prevState => ({ ...prevState, patientNumber: text }))}
-            />
+          />
           <Text style={styles.label}>Tem médico de família?</Text>
           <Switch
             value={showFamilyDoctorFields}
             onValueChange={setShowFamilyDoctorFields}
+            style={styles.switchContainer}
           />
           {showFamilyDoctorFields && (
             <>
@@ -169,6 +185,7 @@ const MedicalRecordsScreen = () => {
           <Switch
             value={showHealthCenterFields}
             onValueChange={setShowHealthCenterFields}
+            style={styles.switchContainer}
           />
           {showHealthCenterFields && (
             <>
@@ -190,6 +207,7 @@ const MedicalRecordsScreen = () => {
           <Switch
             value={showHealthInsuranceFields}
             onValueChange={setShowHealthInsuranceFields}
+            style={styles.switchContainer}
           />
           {showHealthInsuranceFields && (
             <>
@@ -205,22 +223,41 @@ const MedicalRecordsScreen = () => {
           <Switch
             value={showAllergiesFields}
             onValueChange={setShowAllergiesFields}
+            style={styles.switchContainer}
           />
           {showAllergiesFields && (
             <>
               <Text style={styles.label}>Alergias</Text>
-              <TextInput
-                style={styles.input}
-                value={allergy}
-                onChangeText={setAllergy}
-              />
-              <Button title="Adicionar Alergia" onPress={handleAddAllergy} />
+              <View style={styles.allergyContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={allergy}
+                  onChangeText={setAllergy}
+                />
+                <TouchableOpacity style={styles.addButton} onPress={handleAddAllergy}>
+                  <Text style={styles.buttonText}>Adicionar</Text>
+                </TouchableOpacity>
+              </View>
+              {newRecord.allergies && newRecord.allergies.map((item, index) => (
+                <View key={index} style={styles.allergyItem}>
+                  <Text style={styles.subLabel}>{item}</Text>
+                  <TouchableOpacity onPress={() => {
+                    setNewRecord(prevState => ({
+                      ...prevState,
+                      allergies: prevState.allergies?.filter((_, i) => i !== index)
+                    }));
+                  }}>
+                    <Text style={styles.removeButtonText}>Remover</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
             </>
           )}
           <Text style={styles.label}>Está a fazer alguma medicação?</Text>
           <Switch
             value={showMedicationFields}
             onValueChange={setShowMedicationFields}
+            style={styles.switchContainer}
           />
           {showMedicationFields && (
             <>
@@ -236,31 +273,60 @@ const MedicalRecordsScreen = () => {
                 value={medication.startDate}
                 onChangeText={text => setMedication(prevState => ({ ...prevState, startDate: text }))}
               />
-              <Button title="Adicionar Medicamento" onPress={handleAddMedication} />
+              <TouchableOpacity style={styles.addButton} onPress={handleAddMedication}>
+                <Text style={styles.buttonText}>Adicionar</Text>
+              </TouchableOpacity>
+              {newRecord.medication && newRecord.medication.map((med, index) => (
+                <View key={index} style={styles.allergyItem}>
+                  <Text style={styles.subLabel}>{med.name} (Início: {med.startDate})</Text>
+                  <TouchableOpacity onPress={() => {
+                    setNewRecord(prevState => ({
+                      ...prevState,
+                      medication: prevState.medication?.filter((_, i) => i !== index)
+                    }));
+                  }}>
+                    <Text style={styles.removeButtonText}>Remover</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
             </>
           )}
           <Text style={styles.label}>Vacinas em dia?</Text>
           <Switch
             value={newRecord.vaccinesUpToDate}
             onValueChange={value => setNewRecord(prevState => ({ ...prevState, vaccinesUpToDate: value }))}
+            style={styles.switchContainer}
           />
           <Text style={styles.label}>Tem testamento vital?</Text>
           <Switch
             value={newRecord.vitalWill}
             onValueChange={value => setNewRecord(prevState => ({ ...prevState, vitalWill: value }))}
+            style={styles.switchContainer}
           />
           {newRecord.vitalWill && (
             <>
               <Text style={styles.label}>Data de Expiração do Testamento Vital</Text>
-              <TextInput
-                style={styles.input}
-                value={newRecord.vitalWillExpiryDate}
-                onChangeText={text => setNewRecord(prevState => ({ ...prevState, vitalWillExpiryDate: text }))}
-              />
+              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+                <Text>{newRecord.vitalWillExpiryDate ? new Date(newRecord.vitalWillExpiryDate).toLocaleDateString() : 'Selecione a data'}</Text>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={newRecord.vitalWillExpiryDate ? new Date(newRecord.vitalWillExpiryDate) : new Date()}
+                  mode="date"
+                  display="default"
+                  onChange={handleDateChange}
+                />
+              )}
             </>
           )}
-          <Button title="Salvar Registro" onPress={handleSaveRecord} />
-          <Button title="Cancelar" onPress={() => setShowForm(false)} />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveRecord}>
+              <Text style={styles.buttonText}>Salvar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={() => setShowForm(false)}>
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       ) : (
         <>
@@ -272,7 +338,7 @@ const MedicalRecordsScreen = () => {
               keyExtractor={item => item.id!.toString()}
             />
           ) : (
-            <Text>Nenhum registro disponível</Text>
+            <Text style={styles.noRecordsText}>Nenhum registro disponível</Text>
           )}
         </>
       )}
@@ -282,7 +348,11 @@ const MedicalRecordsScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 16,
+  },
+  formContainer: {
+    paddingBottom: 20,
   },
   label: {
     fontSize: 16,
@@ -291,9 +361,13 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: 'gray',
-    padding: 8,
+    padding: 10,
     marginBottom: 16,
     borderRadius: 4,
+  },
+  switchContainer: {
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
   recordContainer: {
     marginBottom: 16,
@@ -308,6 +382,70 @@ const styles = StyleSheet.create({
   subLabel: {
     fontSize: 14,
     marginBottom: 4,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginRight: 5,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginLeft: 5,
+  },
+  addButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  noRecordsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginTop: 20,
+  },
+  allergyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  allergyItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  removeButtonText: {
+    color: 'red',
+  },
+  editButton: {
+    backgroundColor: '#FFA500',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#FF0000',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
 
