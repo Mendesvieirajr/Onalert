@@ -1,15 +1,14 @@
 # OnAlert
 
-OnAlert é uma aplicação móvel desenvolvida para fornecer ferramentas essenciais em situações de emergência. Inspirado pelo princípio de prudência, o projeto visa melhorar a preparação e a resposta a desastres naturais e outras crises. A aplicação oferece funcionalidades como registros médicos, botão de emergência rápida, notificações de alerta, assistência por voz, detecção automática de localização de serviços essenciais e gestão de uma mochila de emergência.
+OnAlert é uma aplicação móvel desenvolvida para fornecer ferramentas essenciais em situações de emergência. Inspirado pelo princípio de prudência, o projeto visa melhorar a preparação e a resposta a desastres naturais e outras crises. A aplicação oferece funcionalidades como registros médicos, botão de emergência rápida, mensagens de alerta, detecção automática de localização  e gestão de uma lista de contactos de emergência.
 
 ## Funcionalidades Principais
 
 - **Registros Médicos**: Permite armazenar e gerenciar informações médicas.
 - **Botão de Emergência Rápida**: Inicia automaticamente uma chamada para os serviços de emergência locais.
-- **Notificações de Alerta**: Receba alertas sobre situações de emergência iminentes na sua região.
-- **Assistência por Voz**: Controle a aplicação por comandos de voz.
-- **Detecção Automática de Localização**: Localiza serviços essenciais próximos em tempo real.
-- **Gestão de Mochila de Emergência**: Rastreamento e recomendações de itens para a mochila de emergência.
+- **Mensagens Alerta**: Envie mensagem aos seus contatos sobre situações de emergência iminentes na seu local.
+- **Detecção Automática de Localização**: Atualiza a sua localização em tempo real, estando pronto para enviar em caso de emergencia.
+- **Gestão de Contactos de Emergência**: Uma lista atualizada dos seus contactos de emergência.
 
 ## Requisitos
 
