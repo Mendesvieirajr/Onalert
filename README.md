@@ -119,3 +119,4 @@ Contribuições são bem-vindas! Siga os passos abaixo para contribuir:
 - Aos meus pais pelo apoio e ideias.
 - Professor Pedro Furtunato pelo Logotipo.
 - Outros docentes pela orientação.
+![Logo_Martim](https://github.com/Mendesvieirajr/Onalert/assets/108261885/e63616d4-3ebb-4113-827d-6a75f44057b5)
