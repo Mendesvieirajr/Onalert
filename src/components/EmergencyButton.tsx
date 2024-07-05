@@ -68,7 +68,7 @@ const EmergencyButton = () => {
   };
 
   return (
-    <TouchableOpacity style={[styles.gridItem, styles.fullWidth, styles.locationButton]} onPress={sendLocationSMS}>
+    <TouchableOpacity style={[styles.gridItem, styles.locationButton]} onPress={sendLocationSMS}>
       <View style={{ alignItems: 'center' }}>
         <Ionicons name="location-outline" size={iconSize} color="#fff" />
         <Text style={styles.gridItemText}>Enviar Localização</Text>
